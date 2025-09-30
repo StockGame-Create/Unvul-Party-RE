@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unvul-Party !!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .auth-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .google-signin-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s;
+        }
+        .google-signin-btn:hover {
+            background: #357ae8;
+        }
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .game-lobby {
+            margin-top: 20px;
+        }
+        .timer-selection {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .timer-selection h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .timer-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .timer-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .timer-option:hover {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+        .timer-option.selected {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .room-list {
+            margin: 20px 0;
+        }
+        .room-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .room-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .room-timer-badge {
+            display: inline-block;
+            background: #17a2b8;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .join-btn, .create-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .create-btn {
+            background: #007bff;
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .game-board {
+            display: none;
+            margin-top: 20px;
+        }
+        .board-container {
+            display: inline-block;
+            background: #daa520;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(15, 30px);
+            grid-template-rows: repeat(15, 30px);
+            gap: 0;
+            background: #cd853f;
+            border: 2px solid #8b4513;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #8b4513;
+            background: #daa520;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cell:hover {
+            background: #e5b73a;
+        }
+        .stone {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .black {
+            background: radial-gradient(circle at 30% 30%, #444, #000);
+        }
+        .white {
+            background: radial-gradient(circle at 30% 30%, #fff, #ccc);
+        }
+        .game-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .turn-indicator {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .players-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            gap: 20px;
+        }
+        .player-card {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .player-card.active {
+            border: 3px solid #28a745;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4); }
+        }
+        .timer-display {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .timer-display.warning {
+            color: #dc3545;
+            animation: blink 0.5s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .leave-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .winner-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+        }
+        .modal-content h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .modal-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Unvul Party !!</h1>
+        <h4>(Made by Unvul ©) Ver 1.0</h4>
+        
+        <div id="authSection" class="auth-section">
+            <button class="google-signin-btn" onclick="signInWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path fill="white" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="white" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="white" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="white" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Google로 로그인
+            </button>
+        </div>
+
+        <div id="gameSection" style="display:none;">
+            <div class="user-info">
+                <div class="user-profile">
+                    <img id="userPhoto" src="" alt="User">
+                    <span id="userName"></span>
+                </div>
+                <button class="logout-btn" onclick="signOut()">로그아웃</button>
+            </div>
+
+            <div id="lobby" class="game-lobby">
+                <h2>게임 로비</h2>
+                
+                <div class="timer-selection">
+                    <h3>⏱️ 타이머 설정</h3>
+                    <div class="timer-options">
+                        <div class="timer-option selected" data-time="30">
+                            <div style="font-size: 24px;">30초</div>
+                            <div style="font-size: 12px; color: #666;">빠른 게임</div>
+                        </div>
+                        <div class="timer-option" data-time="60">
+                            <div style="font-size: 24px;">1분</div>
+                            <div style="font-size: 12px; color: #666;">보통</div>
+                        </div>
+                        <div class="timer-option" data-time="180">
+                            <div style="font-size: 24px;">3분</div>
+                            <div style="font-size: 12px; color: #666;">여유있게</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="create-btn" onclick="createRoom()">새 방 만들기</button>
+                <div class="room-list" id="roomList"></div>
+            </div>
+
+            <div id="gameBoard" class="game-board">
+                <div class="game-info">
+                    <div class="turn-indicator" id="turnInfo">게임 시작 대기중...</div>
+                    <div class="players-info">
+                        <div class="player-card" id="blackCard">
+                            <div>⚫ 흑돌</div>
+                            <div id="blackPlayer">-</div>
+                            <div class="timer-display" id="blackTimer">--:--</div>
+                        </div>
+                        <div class="player-card" id="whiteCard">
+                            <div>⚪ 백돌</div>
+                            <div id="whitePlayer">-</div>
+                            <div class="timer-display" id="whiteTimer">--:--</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <div class="board-container">
+                        <div class="board" id="board"></div>
+                    </div>
+                </div>
+                <button class="leave-btn" onclick="leaveRoom()">방 나가기</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="winnerModal" class="winner-modal">
+        <div class="modal-content">
+            <h2 id="winnerText"></h2>
+            <button class="modal-btn" onclick="returnToLobby()">로비로 돌아가기</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, set, onValue, push, remove, get, update, onDisconnect, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOJvuHvrlk1zTP4Cu33xP9o9We4Hm__9o",
+            authDomain: "unvul-party.firebaseapp.com",
+            databaseURL: "https://unvul-party-default-rtdb.firebaseio.com",
+            projectId: "unvul-party",
+            storageBucket: "unvul-party.firebasestorage.app",
+            messagingSenderId: "367656165353",
+            appId: "1:367656165353:web:93bab995492e1b93d8f578",
+            measurementId: "G-5LQFF2G9L0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUser = null;
+        let currentRoomId = null;
+        let myColor = null;
+        let selectedTimer = 30;
+        let timerInterval = null;
+
+        document.querySelectorAll('.timer-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.timer-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedTimer = parseInt(this.dataset.time);
+            });
+        });
+
+        window.signInWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                currentUser = result.user;
+                showGameSection();
+            } catch (error) {
+                alert('로그인 실패: ' + error.message);
+            }
+        };
+
+        window.signOut = async function() {
+            try {
+                if (currentRoomId) {
+                    await leaveRoom();
+                }
+                await firebaseSignOut(auth);
+                location.reload();
+            } catch (error) {
+                alert('로그아웃 실패: ' + error.message);
+            }
+        };
+
+        function showGameSection() {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('gameSection').style.display = 'block';
+            document.getElementById('userName').textContent = currentUser.displayName;
+            document.getElementById('userPhoto').src = currentUser.photoURL;
+            loadRooms();
+        }
+
+        window.createRoom = async function() {
+            const roomsRef = ref(db, 'rooms');
+            const newRoomRef = push(roomsRef);
+            const roomData = {
+                host: {
+                    uid: currentUser.uid,
+                    name: currentUser.displayName,
+                    photo: currentUser.photoURL
+                },
+                status: 'waiting',
+                timerSeconds: selectedTimer,
+                createdAt: Date.now()
+            };
+            await set(newRoomRef, roomData);
+            joinRoom(newRoomRef.key);
+        };
+
+        function loadRooms() {
+            const roomsRef = ref(db, 'rooms');
+            onValue(roomsRef, (snapshot) => {
+                const rooms = snapshot.val();
+                const roomListDiv = document.getElementById('roomList');
+                roomListDiv.innerHTML = '';
+                
+                if (rooms) {
+                    Object.keys(rooms).forEach(roomId => {
+                        const room = rooms[roomId];
+                        if (room.status === 'waiting') {
+                            const timerLabel = room.timerSeconds === 30 ? '30초' : 
+                                             room.timerSeconds === 60 ? '1분' : '3분';
+                            const roomDiv = document.createElement('div');
+                            roomDiv.className = 'room-item';
+                            roomDiv.innerHTML = `
+                                <div class="room-info">
+                                    <div>
+                                        <strong>${room.host.name}님의 방</strong>
+                                        <span class="room-timer-badge">⏱️ ${timerLabel}</span>
+                                    </div>
+                                    <span style="color: #666;">대기중</span>
+                                </div>
+                                <button class="join-btn" onclick="joinRoom('${roomId}')">입장</button>
+                            `;
+                            roomListDiv.appendChild(roomDiv);
+                        }
+                    });
+                }
+                
+                if (roomListDiv.innerHTML === '') {
+                    roomListDiv.innerHTML = '<p style="text-align: center; color: #666;">대기중인 방이 없습니다.</p>';
+                }
+            });
+        }
+
+        window.joinRoom = async function(roomId) {
+            currentRoomId = roomId;
+            const roomRef = ref(db, `rooms/${roomId}`);
+            const snapshot = await get(roomRef);
+            const roomData = snapshot.val();
+
+            if (roomData.host.uid === currentUser.uid) {
+                myColor = 'black';
+                setupDisconnectHandler(roomId);
+            } else {
+                myColor = 'white';
+                await update(roomRef, {
+                    guest: {
+                        uid: currentUser.uid,
+                        name: currentUser.displayName,
+                        photo: currentUser.photoURL
+                    },
+                    status: 'playing'
+                });
+                await initializeBoard(roomId, roomData.timerSeconds);
+                setupDisconnectHandler(roomId);
+            }
+
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('gameBoard').style.display = 'block';
+            watchGame(roomId);
+        };
+
+        function setupDisconnectHandler(roomId) {
+            const roomRef = ref(db, `rooms/${roomId}`);
+            const disconnectRef = onDisconnect(roomRef);
+            disconnectRef.remove();
+        }
+
+        async function initializeBoard(roomId, timerSeconds) {
+            const board = {};
+            for (let i = 0; i < 15; i++) {
+                board[i] = {};
+                for (let j = 0; j < 15; j++) {
+                    board[i][j] = null;
+                }
+            }
+            const boardData = {
+                board: board,
+                currentTurn: 'black',
+                winner: null,
+                blackTimeLeft: timerSeconds,
+                whiteTimeLeft: timerSeconds,
+                lastMoveTime: Date.now()
+            };
+            await set(ref(db, `rooms/${roomId}/game`), boardData);
+        }
+
+        function watchGame(roomId) {
+            const roomRef = ref(db, `rooms/${roomId}`);
+            onValue(roomRef, async (snapshot) => {
+                const room = snapshot.val();
+                if (!room) {
+                    alert('방이 삭제되었습니다.');
+                    returnToLobby();
+                    return;
+                }
+
+                document.getElementById('blackPlayer').textContent = room.host.name;
+                document.getElementById('whitePlayer').textContent = room.guest ? room.guest.name : '대기중...';
+
+                if (room.status === 'playing' && !room.game) {
+                    if (myColor === 'black') {
+                        await initializeBoard(roomId, room.timerSeconds);
+                    }
+                }
+
+                if (room.game) {
+                    renderBoard(room.game.board);
+                    updateTurnInfo(room.game.currentTurn);
+                    updateTimerDisplay(room.game);
+                    
+                    if (room.game.winner) {
+                        stopTimer();
+                        showWinner(room.game.winner, room);
+                    } else {
+                        startTimer(roomId, room.game);
+                    }
+                }
+            });
+        }
+
+        function startTimer(roomId, game) {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            timerInterval = setInterval(async () => {
+                const roomRef = ref(db, `rooms/${roomId}`);
+                const snapshot = await get(roomRef);
+                const room = snapshot.val();
+                
+                if (!room || !room.game || room.game.winner) {
+                    stopTimer();
+                    return;
+                }
+
+                const currentTime = Date.now();
+                const elapsed = Math.floor((currentTime - room.game.lastMoveTime) / 1000);
+                
+                let newBlackTime = room.game.blackTimeLeft;
+                let newWhiteTime = room.game.whiteTimeLeft;
+                
+                if (room.game.currentTurn === 'black') {
+                    newBlackTime = Math.max(0, room.game.blackTimeLeft - elapsed);
+                } else {
+                    newWhiteTime = Math.max(0, room.game.whiteTimeLeft - elapsed);
+                }
+
+                if (newBlackTime <= 0) {
+                    await update(ref(db, `rooms/${roomId}/game`), {
+                        winner: 'white',
+                        winReason: 'timeout'
+                    });
+                    stopTimer();
+                } else if (newWhiteTime <= 0) {
+                    await update(ref(db, `rooms/${roomId}/game`), {
+                        winner: 'black',
+                        winReason: 'timeout'
+                    });
+                    stopTimer();
+                } else {
+                    await update(ref(db, `rooms/${roomId}/game`), {
+                        blackTimeLeft: newBlackTime,
+                        whiteTimeLeft: newWhiteTime,
+                        lastMoveTime: currentTime
+                    });
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay(game) {
+            const blackTimer = document.getElementById('blackTimer');
+            const whiteTimer = document.getElementById('whiteTimer');
+            const blackCard = document.getElementById('blackCard');
+            const whiteCard = document.getElementById('whiteCard');
+
+            blackTimer.textContent = formatTime(game.blackTimeLeft || 0);
+            whiteTimer.textContent = formatTime(game.whiteTimeLeft || 0);
+
+            blackCard.classList.remove('active');
+            whiteCard.classList.remove('active');
+
+            if (game.currentTurn === 'black') {
+                blackCard.classList.add('active');
+            } else {
+                whiteCard.classList.add('active');
+            }
+
+            if (game.blackTimeLeft <= 10) {
+                blackTimer.classList.add('warning');
+            } else {
+                blackTimer.classList.remove('warning');
+            }
+
+            if (game.whiteTimeLeft <= 10) {
+                whiteTimer.classList.add('warning');
+            } else {
+                whiteTimer.classList.remove('warning');
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function renderBoard(boardData) {
+            const boardDiv = document.getElementById('board');
+            boardDiv.innerHTML = '';
+            
+            for (let i = 0; i < 15; i++) {
+                for (let j = 0; j < 15; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.onclick = () => makeMove(i, j);
+                    
+                    const cellValue = boardData?.[i]?.[j];
+                    if (cellValue) {
+                        const stone = document.createElement('div');
+                        stone.className = `stone ${cellValue}`;
+                        cell.appendChild(stone);
+                    }
+                    
+                    boardDiv.appendChild(cell);
+                }
+            }
+        }
+
+        function updateTurnInfo(turn) {
+            const turnInfo = document.getElementById('turnInfo');
+            if (turn === myColor) {
+                turnInfo.textContent = '당신의 차례입니다!';
+                turnInfo.style.color = '#28a745';
+            } else {
+                turnInfo.textContent = '상대방의 차례입니다...';
+                turnInfo.style.color = '#666';
+            }
+        }
+
+        async function makeMove(row, col) {
+            if (!currentRoomId) return;
+            
+            const roomRef = ref(db, `rooms/${currentRoomId}`);
+            const snapshot = await get(roomRef);
+            const room = snapshot.val();
+            
+            if (!room || !room.game) return;
+            if (room.game.currentTurn !== myColor) return;
+            if (room.game.board?.[row]?.[col]) return;
+            if (room.game.winner) return;
+
+            const newBoard = {};
+            for (let i = 0; i < 15; i++) {
+                newBoard[i] = {};
+                for (let j = 0; j < 15; j++) {
+                    newBoard[i][j] = room.game.board?.[i]?.[j] || null;
+                }
+            }
+            newBoard[row][col] = myColor;
+
+            const winner = checkWinner(newBoard, row, col, myColor);
+            const nextTurn = myColor === 'black' ? 'white' : 'black';
+
+            const updateData = {
+                board: newBoard,
+                currentTurn: nextTurn,
+                lastMoveTime: Date.now()
+            };
+
+            if (winner) {
+                updateData.winner = winner;
+                updateData.winReason = 'omok';
+            }
+
+            await update(ref(db, `rooms/${currentRoomId}/game`), updateData);
+        }
+
+        function checkWinner(board, row, col, color) {
+            const directions = [
+                [[0, 1], [0, -1]],
+                [[1, 0], [-1, 0]],
+                [[1, 1], [-1, -1]],
+                [[1, -1], [-1, 1]]
+            ];
+
+            for (let dir of directions) {
+                let count = 1;
+                for (let [dx, dy] of dir) {
+                    let r = row + dx, c = col + dy;
+                    while (r >= 0 && r < 15 && c >= 0 && c < 15 && board?.[r]?.[c] === color) {
+                        count++;
+                        r += dx;
+                        c += dy;
+                    }
+                }
+                if (count >= 5) return color;
+            }
+            return null;
+        }
+
+        function showWinner(winner, room) {
+            const modal = document.getElementById('winnerModal');
+            const winnerText = document.getElementById('winnerText');
+            
+            const winnerName = winner === 'black' ? room.host.name : room.guest.name;
+            const reason = room.game.winReason === 'timeout' ? '(시간 초과)' : '';
+            winnerText.textContent = `🎉 ${winnerName}님이 승리했습니다! ${reason}`;
+            modal.style.display = 'flex';
+        }
+
+        window.leaveRoom = async function() {
+            if (currentRoomId) {
+                const roomRef = ref(db, `rooms/${currentRoomId}`);
+                const snapshot = await get(roomRef);
+                const room = snapshot.val();
+                
+                if (room) {
+                    if (myColor === 'black') {
+                        await remove(roomRef);
+                    } else {
+                        await update(roomRef, {
+                            guest: null,
+                            status: 'waiting',
+                            game: null
+                        });
+                    }
+                }
+                
+                currentRoomId = null;
+                myColor = null;
+            }
+            returnToLobby();
+        };
+
+        window.returnToLobby = function() {
+            document.getElementById('winnerModal').style.display = 'none';
+            document.getElementById('gameBoard').style.display = 'none';
+            document.getElementById('lobby').style.display = 'block';
+            if (currentRoomId) {
+                leaveRoom();
+            }
+        };
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                showGameSection();
+            }
+        });
+    </script>
+</body>
+</html>
