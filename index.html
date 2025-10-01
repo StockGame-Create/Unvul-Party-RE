@@ -52,6 +52,7 @@
         .google-signin-btn:hover {
             background: #357ae8;
         }
+
         .user-info {
             display: flex;
             justify-content: space-between;
@@ -295,6 +296,149 @@
             font-size: 16px;
             margin-top: 20px;
         }
+        /* CSS 추가 */
+.game-mode-selection {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+.game-mode-selection h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+.mode-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.mode-option {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+}
+.mode-option:hover {
+    border-color: #28a745;
+    background: #e8f5e9;
+}
+.mode-option.selected {
+    border-color: #28a745;
+    background: #28a745;
+    color: white;
+    font-weight: bold;
+}
+.mode-badge {
+    display: inline-block;
+    background: #28a745;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 10px;
+}
+.stone.transparent {
+    display: none;
+}
+.stone.last-move {
+    box-shadow: 0 0 0 3px #ffd700;
+}
+
+.score-display {
+    font-size: 20px;
+    font-weight: bold;
+    color: #007bff;
+    margin-top: 5px;
+}
+.warning-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(220, 53, 69, 0.95);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    animation: warningPulse 0.5s ease-in-out;
+}
+
+@keyframes warningPulse {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.cell.warning-highlight {
+    background: #ff6b6b !important;
+    animation: highlightBlink 0.5s ease-in-out 3;
+}
+
+@keyframes highlightBlink {
+    0%, 100% { background: #daa520 !important; }
+    50% { background: #ff6b6b !important; }
+}
+
+.mode-option[data-mode="classic"]:hover {
+    border-color: #007bff;
+    background: #cce5ff;
+}
+.mode-option[data-mode="classic"].selected {
+    border-color: #007bff;
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.mode-option[data-mode="void"]:hover {
+    border-color: #6c757d;
+    background: #e2e3e5;
+}
+.mode-option[data-mode="void"].selected {
+    border-color: #6c757d;
+    background: #6c757d;
+    color: white;
+    font-weight: bold;
+}
+
+.mode-option[data-mode="relay"]:hover {
+    border-color: #ff6b6b;
+    background: #ffe0e0;
+}
+.mode-option[data-mode="relay"].selected {
+    border-color: #ff6b6b;
+    background: #ff6b6b;
+    color: white;
+    font-weight: bold;
+}
+
+.mode-badge {
+    display: inline-block;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.mode-badge.classic {
+    background: #007bff;
+}
+
+.mode-badge.void {
+    background: #6c757d;
+}
+
+.mode-badge.relay {
+    background: #ff6b6b;
+}
     </style>
 </head>
 <body>
@@ -338,6 +482,28 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 타이머 선택 섹션 아래에 추가 -->
+<div class="game-mode-selection">
+    <h3>🎮 게임 모드</h3>
+    <div class="mode-options">
+        <div class="mode-option selected" data-mode="classic">
+            <div style="font-size: 24px;">클래식</div>
+            <div style="font-size: 12px; color: #666;">일반 오목</div>
+        </div>
+        <div class="mode-option" data-mode="void">
+            <div style="font-size: 24px;">보이드</div>
+            <div style="font-size: 12px; color: #666;">투명 모드</div>
+            </div>
+            
+            <div class="mode-option" data-mode="relay">
+    <div style="font-size: 24px;">릴레이</div>
+    <div style="font-size: 12px; color: #666;">4줄 3개 완성</div>
+    <h4>14일 후 종료</h4>
+</div>
+        </div>
+    </div>
+</div>
 
                 <button class="create-btn" onclick="createRoom()">새 방 만들기</button>
                 <div class="room-list" id="roomList"></div>
@@ -401,6 +567,9 @@
         let myColor = null;
         let selectedTimer = 30;
         let timerInterval = null;
+        let selectedGameMode = 'classic';
+        // 전역 변수에 추가
+let lastWarningMove = null;
 
         document.querySelectorAll('.timer-option').forEach(option => {
             option.addEventListener('click', function() {
@@ -409,6 +578,15 @@
                 selectedTimer = parseInt(this.dataset.time);
             });
         });
+
+        // 게임 모드 선택 이벤트 추가 (타이머 선택 이벤트 아래)
+document.querySelectorAll('.mode-option').forEach(option => {
+    option.addEventListener('click', function() {
+        document.querySelectorAll('.mode-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedGameMode = this.dataset.mode;
+    });
+});
 
         window.signInWithGoogle = async function() {
             const provider = new GoogleAuthProvider();
@@ -433,6 +611,79 @@
             }
         };
 
+        // checkFourInRow 함수 아래에 추가
+function checkOpponentFourInRow(board, opponentColor) {
+    const fourLines = [];
+    
+    for (let i = 0; i < 15; i++) {
+        for (let j = 0; j < 15; j++) {
+            if (board?.[i]?.[j] === opponentColor) {
+                const directions = [
+                    [[0, 1], [0, -1]],   // 가로
+                    [[1, 0], [-1, 0]],   // 세로
+                    [[1, 1], [-1, -1]],  // 대각선 \
+                    [[1, -1], [-1, 1]]   // 대각선 /
+                ];
+
+                for (let dir of directions) {
+                    let positions = [{row: i, col: j}];
+                    
+                    for (let [dx, dy] of dir) {
+                        let r = i + dx, c = j + dy;
+                        while (r >= 0 && r < 15 && c >= 0 && c < 15 && board?.[r]?.[c] === opponentColor) {
+                            positions.push({row: r, col: c});
+                            r += dx;
+                            c += dy;
+                        }
+                    }
+                    
+                    if (positions.length === 4) {
+                        // 양쪽 끝이 빈 칸인지 확인 (막히지 않은 4줄)
+                        const [firstDir] = dir;
+                        const [dx, dy] = firstDir;
+                        const startPos = positions[0];
+                        const endPos = positions[positions.length - 1];
+                        
+                        const beforeRow = startPos.row - dx;
+                        const beforeCol = startPos.col - dy;
+                        const afterRow = endPos.row + dx;
+                        const afterCol = endPos.col + dy;
+                        
+                        const beforeEmpty = beforeRow >= 0 && beforeRow < 15 && beforeCol >= 0 && beforeCol < 15 && !board?.[beforeRow]?.[beforeCol];
+                        const afterEmpty = afterRow >= 0 && afterRow < 15 && afterCol >= 0 && afterCol < 15 && !board?.[afterRow]?.[afterCol];
+                        
+                        if (beforeEmpty || afterEmpty) {
+                            fourLines.push(positions);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return fourLines;
+}
+
+function showFourWarning(fourLines) {
+    // 4줄 위치 하이라이트만
+    fourLines.forEach(line => {
+        line.forEach(pos => {
+            const cellIndex = pos.row * 15 + pos.col;
+            const cells = document.querySelectorAll('.cell');
+            if (cells[cellIndex]) {
+                cells[cellIndex].classList.add('warning-highlight');
+            }
+        });
+    });
+    
+    // 3초 후 하이라이트 제거
+    setTimeout(() => {
+        document.querySelectorAll('.warning-highlight').forEach(cell => {
+            cell.classList.remove('warning-highlight');
+        });
+    }, 3000);
+}
+
         function showGameSection() {
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('gameSection').style.display = 'block';
@@ -444,58 +695,67 @@
         window.createRoom = async function() {
             const roomsRef = ref(db, 'rooms');
             const newRoomRef = push(roomsRef);
-            const roomData = {
-                host: {
-                    uid: currentUser.uid,
-                    name: currentUser.displayName,
-                    photo: currentUser.photoURL
-                },
-                status: 'waiting',
-                timerSeconds: selectedTimer,
-                createdAt: Date.now()
-            };
+const roomData = {
+    host: {
+        uid: currentUser.uid,
+        name: currentUser.displayName,
+        photo: currentUser.photoURL
+    },
+    status: 'waiting',
+    timerSeconds: selectedTimer,
+    gameMode: selectedGameMode, // 추가
+    createdAt: Date.now()
+};
+
             await set(newRoomRef, roomData);
             joinRoom(newRoomRef.key);
         };
 
-        function loadRooms() {
-            const roomsRef = ref(db, 'rooms');
-            onValue(roomsRef, (snapshot) => {
-                const rooms = snapshot.val();
-                const roomListDiv = document.getElementById('roomList');
-                roomListDiv.innerHTML = '';
-                
-                if (rooms) {
-                    Object.keys(rooms).forEach(roomId => {
-                        const room = rooms[roomId];
-                        if (room.status === 'waiting') {
-                            const timerLabel = room.timerSeconds === 30 ? '30초' : 
-                                             room.timerSeconds === 60 ? '1분' : '3분';
-                            const roomDiv = document.createElement('div');
-                            roomDiv.className = 'room-item';
-                            roomDiv.innerHTML = `
-                                <div class="room-info">
-                                    <div>
-                                        <strong>${room.host.name}님의 방</strong>
-                                        <span class="room-timer-badge">⏱️ ${timerLabel}</span>
-                                    </div>
-                                    <span style="color: #666;">대기중</span>
-                                </div>
-                                <button class="join-btn" onclick="joinRoom('${roomId}')">입장</button>
-                            `;
-                            roomListDiv.appendChild(roomDiv);
-                        }
-                    });
-                }
-                
-                if (roomListDiv.innerHTML === '') {
-                    roomListDiv.innerHTML = '<p style="text-align: center; color: #666;">대기중인 방이 없습니다.</p>';
+function loadRooms() {
+    const roomsRef = ref(db, 'rooms');
+    onValue(roomsRef, (snapshot) => {
+        const rooms = snapshot.val();
+        const roomListDiv = document.getElementById('roomList');
+        roomListDiv.innerHTML = '';
+        
+        if (rooms) {
+            Object.keys(rooms).forEach(roomId => {
+                const room = rooms[roomId];
+                if (room.status === 'waiting') {
+                    const timerLabel = room.timerSeconds === 30 ? '30초' : 
+                                     room.timerSeconds === 60 ? '1분' : '3분';
+                   
+                    const roomDiv = document.createElement('div');
+                    roomDiv.className = 'room-item';
+                   const modeLabel = room.gameMode === 'void' ? '보이드' : 
+                 room.gameMode === 'relay' ? '릴레이' : '클래식';
+const modeClass = room.gameMode || 'classic';
+
+roomDiv.innerHTML = `
+    <div class="room-info">
+        <div>
+            <strong>${room.host.name}님의 방</strong>
+            <span class="room-timer-badge">⏱️ ${timerLabel}</span>
+            <span class="mode-badge ${modeClass}">🎮 ${modeLabel}</span>
+        </div>
+        <span style="color: #666;">대기중</span>
+    </div>
+    <button class="join-btn" onclick="joinRoom('${roomId}')">입장</button>
+`;
+                    roomListDiv.appendChild(roomDiv);
                 }
             });
         }
+        
+        if (roomListDiv.innerHTML === '') {
+            roomListDiv.innerHTML = '<p style="text-align: center; color: #666;">대기중인 방이 없습니다.</p>';
+        }
+    });
+}
 
         window.joinRoom = async function(roomId) {
-            currentRoomId = roomId;
+    lastWarningMove = null; // 추가
+    currentRoomId = roomId;
             const roomRef = ref(db, `rooms/${roomId}`);
             const snapshot = await get(roomRef);
             const roomData = snapshot.val();
@@ -536,50 +796,75 @@
                     board[i][j] = null;
                 }
             }
-            const boardData = {
-                board: board,
-                currentTurn: 'black',
-                winner: null,
-                blackTimeLeft: timerSeconds,
-                whiteTimeLeft: timerSeconds,
-                lastMoveTime: Date.now()
-            };
+const boardData = {
+    board: board,
+    currentTurn: 'black',
+    winner: null,
+    blackTimeLeft: timerSeconds,
+    whiteTimeLeft: timerSeconds,
+    lastMoveTime: Date.now(),
+    moveCount: 0,
+    lastMove: null,
+    blackScore: 0,  // 추가
+    whiteScore: 0   // 추가
+};
+
             await set(ref(db, `rooms/${roomId}/game`), boardData);
         }
 
-        function watchGame(roomId) {
-            const roomRef = ref(db, `rooms/${roomId}`);
-            onValue(roomRef, async (snapshot) => {
-                const room = snapshot.val();
-                if (!room) {
-                    alert('방이 삭제되었습니다.');
-                    returnToLobby();
-                    return;
-                }
-
-                document.getElementById('blackPlayer').textContent = room.host.name;
-                document.getElementById('whitePlayer').textContent = room.guest ? room.guest.name : '대기중...';
-
-                if (room.status === 'playing' && !room.game) {
-                    if (myColor === 'black') {
-                        await initializeBoard(roomId, room.timerSeconds);
-                    }
-                }
-
-                if (room.game) {
-                    renderBoard(room.game.board);
-                    updateTurnInfo(room.game.currentTurn);
-                    updateTimerDisplay(room.game);
-                    
-                    if (room.game.winner) {
-                        stopTimer();
-                        showWinner(room.game.winner, room);
-                    } else {
-                        startTimer(roomId, room.game);
-                    }
-                }
-            });
+function watchGame(roomId) {
+    const roomRef = ref(db, `rooms/${roomId}`);
+    onValue(roomRef, async (snapshot) => {
+        const room = snapshot.val();
+        if (!room) {
+            alert('방이 삭제되었습니다.');
+            returnToLobby();
+            return;
         }
+
+        document.getElementById('blackPlayer').innerHTML = `
+            ${room.host.name}
+            ${room.gameMode === 'relay' ? `<div class="score-display">🏆 ${room.game?.blackScore || 0}/3</div>` : ''}
+        `;
+        document.getElementById('whitePlayer').innerHTML = `
+            ${room.guest ? room.guest.name : '대기중...'}
+            ${room.gameMode === 'relay' && room.guest ? `<div class="score-display">🏆 ${room.game?.whiteScore || 0}/3</div>` : ''}
+        `;
+
+        if (room.status === 'playing' && !room.game) {
+            if (myColor === 'black') {
+                await initializeBoard(roomId, room.timerSeconds);
+            }
+        }
+
+        if (room.game) {
+            renderBoard(room.game.board, room.gameMode, room.game.moveCount || 0, room.game.lastMove);
+            updateTurnInfo(room.game.currentTurn);
+            updateTimerDisplay(room.game);
+            
+// 클래식 모드에서만 4줄 체크
+const currentMoveCount = room.game.moveCount || 0;
+if (room.gameMode === 'classic' && room.game.currentTurn === myColor && !room.game.winner) {
+    // 이전에 경고한 수와 다른 경우에만 경고
+    if (lastWarningMove !== currentMoveCount) {
+        const opponentColor = myColor === 'black' ? 'white' : 'black';
+        const opponentFourLines = checkOpponentFourInRow(room.game.board, opponentColor);
+        if (opponentFourLines.length > 0) {
+            showFourWarning(opponentFourLines);
+            lastWarningMove = currentMoveCount;
+        }
+    }
+}
+            
+            if (room.game.winner) {
+                stopTimer();
+                showWinner(room.game.winner, room);
+            } else {
+                startTimer(roomId, room.game);
+            }
+        }
+    });
+}
 
         function startTimer(roomId, game) {
             if (timerInterval) {
@@ -674,28 +959,41 @@
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function renderBoard(boardData) {
-            const boardDiv = document.getElementById('board');
-            boardDiv.innerHTML = '';
+function renderBoard(boardData, gameMode, moveCount, lastMove) {
+    const boardDiv = document.getElementById('board');
+    boardDiv.innerHTML = '';
+    
+    const isVoidMode = gameMode === 'void';
+    const showAllStones = !isVoidMode || (moveCount % 7 === 0);
+    
+    for (let i = 0; i < 15; i++) {
+        for (let j = 0; j < 15; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.onclick = () => makeMove(i, j);
             
-            for (let i = 0; i < 15; i++) {
-                for (let j = 0; j < 15; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.onclick = () => makeMove(i, j);
-                    
-                    const cellValue = boardData?.[i]?.[j];
-                    if (cellValue) {
-                        const stone = document.createElement('div');
-                        stone.className = `stone ${cellValue}`;
-                        cell.appendChild(stone);
+            const cellValue = boardData?.[i]?.[j];
+            if (cellValue) {
+                const stone = document.createElement('div');
+                stone.className = `stone ${cellValue}`;
+                
+                // 보이드 모드 처리
+                if (isVoidMode && !showAllStones) {
+                    // 마지막 수가 아니면 투명하게
+                    if (!lastMove || lastMove.row !== i || lastMove.col !== j) {
+                        stone.classList.add('transparent');
+                    } else {
+                        stone.classList.add('last-move');
                     }
-                    
-                    boardDiv.appendChild(cell);
                 }
+                
+                cell.appendChild(stone);
             }
+            
+            boardDiv.appendChild(cell);
         }
-
+    }
+}
         function updateTurnInfo(turn) {
             const turnInfo = document.getElementById('turnInfo');
             if (turn === myColor) {
@@ -707,109 +1005,176 @@
             }
         }
 
-        async function makeMove(row, col) {
-            if (!currentRoomId) return;
-            
-            const roomRef = ref(db, `rooms/${currentRoomId}`);
-            const snapshot = await get(roomRef);
-            const room = snapshot.val();
-            
-            if (!room || !room.game) return;
-            if (room.game.currentTurn !== myColor) return;
-            if (room.game.board?.[row]?.[col]) return;
-            if (room.game.winner) return;
+async function makeMove(row, col) {
+    if (!currentRoomId) return;
+    
+    const roomRef = ref(db, `rooms/${currentRoomId}`);
+    const snapshot = await get(roomRef);
+    const room = snapshot.val();
+    
+    if (!room || !room.game) return;
+    if (room.game.currentTurn !== myColor) return;
+    if (room.game.board?.[row]?.[col]) return;
+    if (room.game.winner) return;
 
-            const newBoard = {};
-            for (let i = 0; i < 15; i++) {
-                newBoard[i] = {};
-                for (let j = 0; j < 15; j++) {
-                    newBoard[i][j] = room.game.board?.[i]?.[j] || null;
-                }
-            }
-            newBoard[row][col] = myColor;
-
-            const winner = checkWinner(newBoard, row, col, myColor);
-            const nextTurn = myColor === 'black' ? 'white' : 'black';
-
-            const updateData = {
-                board: newBoard,
-                currentTurn: nextTurn,
-                lastMoveTime: Date.now()
-            };
-
-            if (winner) {
-                updateData.winner = winner;
-                updateData.winReason = 'omok';
-            }
-
-            await update(ref(db, `rooms/${currentRoomId}/game`), updateData);
+    const newBoard = {};
+    for (let i = 0; i < 15; i++) {
+        newBoard[i] = {};
+        for (let j = 0; j < 15; j++) {
+            newBoard[i][j] = room.game.board?.[i]?.[j] || null;
         }
+    }
+    newBoard[row][col] = myColor;
+
+    const nextTurn = myColor === 'black' ? 'white' : 'black';
+    let updateData = {
+        board: newBoard,
+        currentTurn: nextTurn,
+        lastMoveTime: Date.now(),
+        moveCount: (room.game.moveCount || 0) + 1,
+        lastMove: { row: row, col: col }
+    };
+
+    // 릴레이 모드 처리
+    if (room.gameMode === 'relay') {
+        const fourLine = checkFourInRow(newBoard, row, col, myColor);
+        if (fourLine) {
+            fourLine.forEach(pos => {
+                newBoard[pos.row][pos.col] = null;
+            });
+            
+            const scoreKey = myColor === 'black' ? 'blackScore' : 'whiteScore';
+            const newScore = (room.game[scoreKey] || 0) + 1;
+            updateData[scoreKey] = newScore;
+            updateData.board = newBoard;
+            
+            const timeKey = myColor === 'black' ? 'blackTimeLeft' : 'whiteTimeLeft';
+            updateData[timeKey] = room.game[timeKey] + 10;
+            
+            if (newScore >= 3) {
+                updateData.winner = myColor;
+                updateData.winReason = 'relay';
+            }
+        }
+    } else {
+        // 일반 오목 승리 체크
+        const winner = checkWinner(newBoard, row, col, myColor);
+        if (winner) {
+            updateData.winner = winner;
+            updateData.winReason = 'omok';
+        } else {
+            // 승리하지 않았다면 상대방의 4줄 체크
+            const opponentColor = myColor === 'black' ? 'white' : 'black';
+            const opponentFourLines = checkOpponentFourInRow(newBoard, opponentColor);
+            if (opponentFourLines.length > 0) {
+                showFourWarning(opponentFourLines);
+            }
+        }
+    }
+
+    await update(ref(db, `rooms/${currentRoomId}/game`), updateData);
+}
+
+function checkFourInRow(board, row, col, color) {
+    const directions = [
+        [[0, 1], [0, -1]],   // 가로
+        [[1, 0], [-1, 0]],   // 세로
+        [[1, 1], [-1, -1]],  // 대각선 \
+        [[1, -1], [-1, 1]]   // 대각선 /
+    ];
+
+    for (let dir of directions) {
+        let positions = [{row, col}];
+        
+        // 양방향으로 탐색
+        for (let [dx, dy] of dir) {
+            let r = row + dx, c = col + dy;
+            while (r >= 0 && r < 15 && c >= 0 && c < 15 && board?.[r]?.[c] === color) {
+                positions.push({row: r, col: c});
+                r += dx;
+                c += dy;
+            }
+        }
+        
+        // 정확히 4개 이상이면 처음 4개만 반환
+        if (positions.length >= 4) {
+            return positions.slice(0, 4);
+        }
+    }
+    
+    return null;
+}
 
         function checkWinner(board, row, col, color) {
-            const directions = [
-                [[0, 1], [0, -1]],
-                [[1, 0], [-1, 0]],
-                [[1, 1], [-1, -1]],
-                [[1, -1], [-1, 1]]
-            ];
+    const directions = [
+        [[0, 1], [0, -1]],
+        [[1, 0], [-1, 0]],
+        [[1, 1], [-1, -1]],
+        [[1, -1], [-1, 1]]
+    ];
 
-            for (let dir of directions) {
-                let count = 1;
-                for (let [dx, dy] of dir) {
-                    let r = row + dx, c = col + dy;
-                    while (r >= 0 && r < 15 && c >= 0 && c < 15 && board?.[r]?.[c] === color) {
-                        count++;
-                        r += dx;
-                        c += dy;
-                    }
-                }
-                if (count >= 5) return color;
+    for (let dir of directions) {
+        let count = 1;
+        for (let [dx, dy] of dir) {
+            let r = row + dx, c = col + dy;
+            while (r >= 0 && r < 15 && c >= 0 && c < 15 && board?.[r]?.[c] === color) {
+                count++;
+                r += dx;
+                c += dy;
             }
-            return null;
         }
+        if (count >= 5) return color;
+    }
+    return null;
+};
 
         function showWinner(winner, room) {
-            const modal = document.getElementById('winnerModal');
-            const winnerText = document.getElementById('winnerText');
-            
-            const winnerName = winner === 'black' ? room.host.name : room.guest.name;
-            const reason = room.game.winReason === 'timeout' ? '(시간 초과)' : '';
-            winnerText.textContent = `🎉 ${winnerName}님이 승리했습니다! ${reason}`;
-            modal.style.display = 'flex';
+    const modal = document.getElementById('winnerModal');
+    const winnerText = document.getElementById('winnerText');
+    
+    const winnerName = winner === 'black' ? room.host.name : room.guest.name;
+    let reason = '';
+    if (room.game.winReason === 'timeout') reason = '(시간 초과)';
+    else if (room.game.winReason === 'relay') reason = '(4줄 3개 완성!)';
+    
+    winnerText.textContent = `🎉 ${winnerName}님이 승리했습니다! ${reason}`;
+    modal.style.display = 'flex';
+}
+
+window.leaveRoom = async function() {
+    if (currentRoomId) {
+        const roomRef = ref(db, `rooms/${currentRoomId}`);
+        const snapshot = await get(roomRef);
+        const room = snapshot.val();
+        
+        if (room) {
+            if (myColor === 'black') {
+                await remove(roomRef);
+            } else {
+                await update(roomRef, {
+                    guest: null,
+                    status: 'waiting',
+                    game: null
+                });
+            }
         }
+        
+        currentRoomId = null;
+        myColor = null;
+        lastWarningMove = null; // 추가
+    }
+    returnToLobby();
+};
 
-        window.leaveRoom = async function() {
-            if (currentRoomId) {
-                const roomRef = ref(db, `rooms/${currentRoomId}`);
-                const snapshot = await get(roomRef);
-                const room = snapshot.val();
-                
-                if (room) {
-                    if (myColor === 'black') {
-                        await remove(roomRef);
-                    } else {
-                        await update(roomRef, {
-                            guest: null,
-                            status: 'waiting',
-                            game: null
-                        });
-                    }
-                }
-                
-                currentRoomId = null;
-                myColor = null;
-            }
-            returnToLobby();
-        };
-
-        window.returnToLobby = function() {
-            document.getElementById('winnerModal').style.display = 'none';
-            document.getElementById('gameBoard').style.display = 'none';
-            document.getElementById('lobby').style.display = 'block';
-            if (currentRoomId) {
-                leaveRoom();
-            }
-        };
+window.returnToLobby = function() {
+    document.getElementById('winnerModal').style.display = 'none';
+    document.getElementById('gameBoard').style.display = 'none';
+    document.getElementById('lobby').style.display = 'block';
+    lastWarningMove = null; // 추가
+    if (currentRoomId) {
+        leaveRoom();
+    }
+};
 
         auth.onAuthStateChanged((user) => {
             if (user) {
